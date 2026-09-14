@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: Zafro Bridge add-on repository
+url: 'https://github.com/steubens/hass-zafro'
+maintainer: steubens <6864307+steubens@users.noreply.github.com>

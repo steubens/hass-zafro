@@ -1,0 +1,49 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration
+name: Zafro Bridge
+version: "0.1.0"
+slug: zafro_bridge
+description: >-
+  Local, cloud-independent control of Zafro / Rowan smart window air
+  conditioners via Home Assistant MQTT Discovery, while keeping the official
+  app working. Other Zafro app appliances may work but are untested.
+url: https://github.com/steubens/hass-zafro/tree/main/zafro_bridge
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+boot: auto
+# Device-based MQTT discovery and horizontal swing on MQTT climate need a recent core.
+homeassistant: "2025.3.0"
+services:
+  - mqtt:need
+ports:
+  8443/tcp: 8443
+ports_description:
+  8443/tcp: >-
+    Device endpoint. Redirect the appliance's cloud traffic (zafro.nbrowan.com:443)
+    to this port on your Home Assistant host.
+watchdog: "tcp://[HOST]:[PORT:8443]"
+options:
+  cloud_relay: true
+  cloud_host: zafro.nbrowan.com
+  tls_hostname: zafro.nbrowan.com
+  discovery_prefix: homeassistant
+  state_refresh_seconds: 300
+  info_refresh_seconds: 900
+  log_level: info
+  allowed_serials: []
+schema:
+  cloud_relay: bool
+  cloud_host: str
+  tls_hostname: str
+  discovery_prefix: str
+  state_refresh_seconds: int(30,3600)
+  info_refresh_seconds: int(60,86400)
+  log_level: list(trace|debug|info|notice|warning|error|fatal)
+  allowed_serials:
+    - str
+  mqtt_host: str?
+  mqtt_port: port?
+  mqtt_username: str?
+  mqtt_password: password?

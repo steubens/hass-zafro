@@ -1,0 +1,61 @@
+name: New device report
+description: Report that a different Zafro/Rowan/i4season appliance works (or doesn't), to grow the supported-devices list.
+labels: ["new-device"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project tracks which appliances have actually been tested
+        against which ones are merely expected to work because they share
+        the same app/platform (see the supported-devices table in the
+        repository README). Reports here are how that list grows.
+
+        If you're able to capture the appliance's `cmd:5` device-info reply,
+        see the "Capturing a different product" section of `CAPTURE.md` for
+        what's most useful and how to redact it before pasting here.
+
+  - type: input
+    id: product-code
+    attributes:
+      label: Product code
+      description: >-
+        From the `cmd:5` device-info reply's `p` field, or the model/product
+        code on the appliance's label or the vendor app.
+    validations:
+      required: true
+
+  - type: input
+    id: appliance-type
+    attributes:
+      label: Appliance type
+      description: e.g. window air conditioner, portable AC, dehumidifier, etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: works
+    attributes:
+      label: What works
+      description: Which entities/controls behave correctly in Home Assistant.
+    validations:
+      required: false
+
+  - type: textarea
+    id: doesnt-work
+    attributes:
+      label: What doesn't work
+      description: Missing controls, wrong values, crashes, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: device-info
+    attributes:
+      label: Redacted cmd:5 device-info reply (optional but very helpful)
+      description: >-
+        The full `{"cmd":5,...}` reply, with `sn` replaced by a same-length
+        placeholder. See `CAPTURE.md`'s "Capturing a different product"
+        section for how to get this and what else to redact.
+      render: json
+    validations:
+      required: false

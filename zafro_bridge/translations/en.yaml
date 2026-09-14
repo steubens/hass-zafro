@@ -1,0 +1,51 @@
+configuration:
+  cloud_relay:
+    name: Relay to vendor cloud
+    description: >-
+      Keep the official Zafro app working by relaying the appliance's traffic to
+      the vendor cloud. Turn off for a fully offline setup (the app will stop
+      working; Home Assistant control is unaffected).
+  cloud_host:
+    name: Cloud host
+    description: The vendor cloud hostname to relay to. Leave at the default unless the vendor changes it.
+  tls_hostname:
+    name: Certificate hostname
+    description: >-
+      Hostname on the self-signed certificate presented to the appliance. Must
+      match the cloud hostname the appliance expects. Leave at the default.
+  discovery_prefix:
+    name: MQTT discovery prefix
+    description: The Home Assistant MQTT discovery prefix (default "homeassistant").
+  state_refresh_seconds:
+    name: State refresh interval (seconds)
+    description: How often to ask each appliance for a full state snapshot.
+  info_refresh_seconds:
+    name: Info refresh interval (seconds)
+    description: How often to refresh Wi-Fi signal and firmware information.
+  log_level:
+    name: Log level
+    description: Verbosity of the add-on log.
+  mqtt_host:
+    name: MQTT host (optional)
+    description: Override the broker host. Leave empty to use the Mosquitto add-on automatically.
+  mqtt_port:
+    name: MQTT port (optional)
+    description: Override the broker port.
+  mqtt_username:
+    name: MQTT username (optional)
+    description: Override the broker username.
+  mqtt_password:
+    name: MQTT password (optional)
+    description: Override the broker password.
+  allowed_serials:
+    name: Allowed serial numbers (optional)
+    description: >-
+      Restrict the device endpoint to these appliance serial numbers. Leave
+      empty to accept a connection from any appliance (fine for a home
+      network, but anyone who can reach this port on the network can pose as
+      an appliance while it's empty). A CONNECT for a serial not on this
+      list is refused and the connection is closed.
+network:
+  8443/tcp: >-
+    Device endpoint. Redirect the appliance's cloud traffic
+    (zafro.nbrowan.com:443) to this port on your Home Assistant host.

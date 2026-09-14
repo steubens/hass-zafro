@@ -1,0 +1,25 @@
+# Raw captures contain device credentials — keep them out of the repo
+research/
+*.mitm
+*.pcap
+*.pcapng
+capture*.log
+wsdump*.py
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Personal, machine-local notes for Claude Code
+CLAUDE.local.md
+
+# Local tool caches
+.lean-ctx/

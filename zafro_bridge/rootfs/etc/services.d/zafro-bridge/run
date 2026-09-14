@@ -1,0 +1,81 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the Zafro Bridge service
+# Reads add-on options + the Supervisor's MQTT service, exports them as
+# environment variables, ensures a device certificate exists, then runs the
+# bridge. s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+declare mqtt_host mqtt_port mqtt_username mqtt_password mqtt_ssl tls_hostname allowed_serials
+
+bashio::log.info "Preparing Zafro Bridge..."
+
+# ---- MQTT broker: explicit options win, otherwise Supervisor service discovery
+if bashio::config.has_value 'mqtt_host'; then
+    bashio::log.info "Using MQTT broker from add-on options"
+    mqtt_host=$(bashio::config 'mqtt_host')
+    mqtt_port=$(bashio::config 'mqtt_port' '1883')
+    mqtt_username=$(bashio::config 'mqtt_username' '')
+    mqtt_password=$(bashio::config 'mqtt_password' '')
+    mqtt_ssl="false"
+elif bashio::services.available 'mqtt'; then
+    bashio::log.info "Using MQTT broker provided by the Supervisor (Mosquitto add-on)"
+    mqtt_host=$(bashio::services 'mqtt' 'host')
+    mqtt_port=$(bashio::services 'mqtt' 'port')
+    mqtt_username=$(bashio::services 'mqtt' 'username')
+    mqtt_password=$(bashio::services 'mqtt' 'password')
+    mqtt_ssl=$(bashio::services 'mqtt' 'ssl')
+else
+    bashio::exit.nok "No MQTT broker found. Install the Mosquitto broker add-on, or set mqtt_host in this add-on's options."
+fi
+
+export MQTT_HOST="${mqtt_host}"
+export MQTT_PORT="${mqtt_port}"
+export MQTT_USERNAME="${mqtt_username}"
+export MQTT_PASSWORD="${mqtt_password}"
+export MQTT_SSL="${mqtt_ssl}"
+
+# ---- Options -> environment consumed by zafro_bridge.config
+export ZAFRO_CLOUD_RELAY="$(bashio::config 'cloud_relay')"
+export ZAFRO_CLOUD_HOST="$(bashio::config 'cloud_host')"
+export ZAFRO_DISCOVERY_PREFIX="$(bashio::config 'discovery_prefix')"
+export ZAFRO_STATE_REFRESH="$(bashio::config 'state_refresh_seconds')"
+export ZAFRO_INFO_REFRESH="$(bashio::config 'info_refresh_seconds')"
+export ZAFRO_LOG_LEVEL="$(bashio::config 'log_level')"
+
+# allowed_serials is a list option; bashio::config prints one item per line
+# ("null" if the option is entirely unset). Collapse it into the
+# comma-separated form zafro_bridge.config expects, dropping blank/"null"
+# lines so an empty list really means "accept any appliance".
+allowed_serials=""
+while IFS= read -r serial_line; do
+    [[ -z "${serial_line}" || "${serial_line}" == "null" ]] && continue
+    if [[ -z "${allowed_serials}" ]]; then
+        allowed_serials="${serial_line}"
+    else
+        allowed_serials="${allowed_serials},${serial_line}"
+    fi
+done < <(bashio::config 'allowed_serials')
+export ZAFRO_ALLOWED_SERIALS="${allowed_serials}"
+
+export ZAFRO_LISTEN_HOST="0.0.0.0"
+export ZAFRO_LISTEN_PORT="8443"   # container port; the host mapping lives in config.yaml
+tls_hostname="$(bashio::config 'tls_hostname')"
+
+# ---- Self-signed certificate for the cloud hostname (kept in /data, so it persists)
+export ZAFRO_TLS_CERT="/data/tls/cert.pem"
+export ZAFRO_TLS_KEY="/data/tls/key.pem"
+if [[ ! -f "${ZAFRO_TLS_CERT}" || ! -f "${ZAFRO_TLS_KEY}" ]]; then
+    bashio::log.info "Generating a self-signed certificate for ${tls_hostname}"
+    mkdir -p /data/tls
+    if ! openssl req -x509 -newkey rsa:2048 -sha256 -days 3650 -nodes \
+            -keyout "${ZAFRO_TLS_KEY}" -out "${ZAFRO_TLS_CERT}" \
+            -subj "/CN=${tls_hostname}" -addext "subjectAltName=DNS:${tls_hostname}" \
+            > /dev/null 2>&1; then
+        bashio::exit.nok "Failed to generate the device certificate"
+    fi
+fi
+
+bashio::log.info "Starting Zafro Bridge (cloud relay: ${ZAFRO_CLOUD_RELAY}, cloud host: ${ZAFRO_CLOUD_HOST})"
+cd /usr/src || bashio::exit.nok "Bridge sources missing"
+exec python3 -m zafro_bridge

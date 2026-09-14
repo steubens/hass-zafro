@@ -1,0 +1,72 @@
+name: Bug report
+description: Something isn't working the way it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing, please check the log at `debug` level (Configuration
+        → `log_level: debug`) — most issues are visible there. See the
+        "Getting help" section of `zafro_bridge/DOCS.md` for what's safe to
+        paste: the bridge redacts Wi-Fi SSID and account/client identifiers
+        from device payloads before logging them, but serial numbers and
+        appliance state are logged in full — review before pasting if you'd
+        rather keep those private too.
+
+        If this is a security vulnerability rather than a bug, please use
+        [private reporting](../../security/advisories/new) instead — see
+        `SECURITY.md`.
+
+  - type: input
+    id: addon-version
+    attributes:
+      label: Add-on version
+      description: Settings → Add-ons → Zafro Bridge → shown at the top.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant version
+      description: Settings → About.
+      placeholder: "2025.9.1"
+    validations:
+      required: true
+
+  - type: input
+    id: product-code
+    attributes:
+      label: Appliance product code
+      description: Shown as the device model in Home Assistant, e.g. W15491-8K.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cloud-relay
+    attributes:
+      label: cloud_relay
+      options:
+        - "true (default) — vendor app also expected to work"
+        - "false — fully offline"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Debug log excerpt
+      description: >-
+        Set `log_level: debug`, reproduce the problem, and paste the
+        relevant excerpt. Please redact anything you consider sensitive
+        beyond what the bridge already redacts.
+      render: text

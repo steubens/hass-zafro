@@ -1,0 +1,34 @@
+[project]
+name = "zafro-bridge"
+version = "0.1.0"
+description = "Home Assistant add-on: local, cloud-independent control of Zafro / Rowan smart appliances."
+requires-python = ">=3.13"
+license = { text = "MIT" }
+
+# This project ships as a Home Assistant add-on (see zafro_bridge/), not a
+# published Python package, so there is intentionally no [build-system] here.
+# `requires-python` and the tool configuration below exist so editors, ruff,
+# and pytest all agree on the same Python target without a packaging step.
+
+[tool.pytest.ini_options]
+# The add-on's package lives under zafro_bridge/rootfs/usr/src (mirroring the
+# container's PYTHONPATH), not at the repo root, so pytest needs to be told
+# where to find it. This replaces the sys.path shim that used to live in
+# tests/conftest.py.
+testpaths = ["tests"]
+pythonpath = ["zafro_bridge/rootfs/usr/src"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 130
+
+[tool.ruff.lint]
+# E/F/W: pycodestyle + pyflakes basics. I: import sorting. B: bugbear (common
+# footguns). UP: pyupgrade (modern syntax for the pinned Python version).
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = [
+    # The wire-protocol and test-vector modules quote real (placeholder)
+    # payloads and hex strings verbatim for readability; wrapping them to fit
+    # a line limit would make them harder to compare against captures.
+    "E501",
+]

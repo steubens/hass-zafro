@@ -1,0 +1,20 @@
+---
+version: 2
+updates:
+  # The add-on's pinned Python runtime dependencies (requirements.txt).
+  - package-ecosystem: "pip"
+    directory: "/zafro_bridge"
+    schedule:
+      interval: "weekly"
+
+  # Actions used by our own CI workflow.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # The add-on's base image (BUILD_FROM in the Dockerfile).
+  - package-ecosystem: "docker"
+    directory: "/zafro_bridge"
+    schedule:
+      interval: "weekly"

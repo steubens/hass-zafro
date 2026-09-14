@@ -1,0 +1,67 @@
+#include <tunables/global>
+
+profile zafro_bridge flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # Capabilities
+  #
+  # NOTE: the blanket "file," rule below grants unrestricted filesystem
+  # access. Home Assistant's own add-on template ships this same rule
+  # because it covers the s6-overlay supervisor process (PID 1 inside the
+  # container), which execs and reads paths this profile can't enumerate in
+  # advance. Do not remove it without confirming s6 still starts — there is
+  # no real Home Assistant host in this repo's dev/CI environment to test
+  # against, and a profile that fails to load blocks add-on installation
+  # entirely (see the AppArmor gotcha in CLAUDE.md). Tightening this further
+  # would mean splitting off a dedicated child profile scoped to just the
+  # Python bridge process (via a "px" transition on its exec), leaving s6
+  # itself under the permissive rule; that's future work, not done here.
+  file,
+  signal (send) set=(kill,term,int,hup,cont),
+  signal (receive) peer=*_zafro_bridge,
+
+  # Network: TLS listener for the appliance, the vendor cloud relay,
+  # the MQTT broker and the Supervisor API.
+  network inet tcp,
+  network inet6 tcp,
+  network inet udp,
+  network inet6 udp,
+
+  # S6-Overlay
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /usr/local/bin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  # Bashio
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
+
+  # Add-on data: options.json and the generated device certificate
+  /data/** rw,
+
+  # Python interpreter, libraries and the bridge sources (read / map only)
+  /usr/local/lib/python3*/** mr,
+  /usr/lib/python3*/** mr,
+  /usr/local/lib/** mr,
+  /usr/lib/** mr,
+  /lib/** mr,
+  /usr/src/** r,
+
+  # Resolver, CA bundle, locale, timezone, entropy
+  /etc/** r,
+  /usr/share/** r,
+  /proc/** r,
+  /sys/** r,
+  /dev/urandom r,
+  /dev/random r,
+  /dev/null rw,
+}

@@ -1,0 +1,4 @@
+# Exact pins so add-on builds are reproducible; Dependabot (.github/dependabot.yml)
+# opens a PR when a newer release is available — bump here, don't widen the range.
+aiohttp==3.14.3
+aiomqtt==2.5.1

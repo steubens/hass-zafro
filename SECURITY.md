@@ -18,6 +18,11 @@ you can include reproduction details (including anything you wouldn't want
 in a public issue, such as a debug log) without exposing it before a fix is
 available.
 
+If that link doesn't open a report form, private reporting isn't available
+on the repository yet. In that case, open an issue titled **"Security
+contact request"** containing no details about the vulnerability, and the
+maintainer will reply with a private way to send them.
+
 ## Scope
 
 In scope:

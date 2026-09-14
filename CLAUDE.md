@@ -121,3 +121,6 @@ never in the network layers.
 4. Verify on a real HA: install as local add-on, appliance connects, entities
    appear, one command round-trips, connection stable for a few minutes.
 5. Tag and push.
+6. First public release only: once the repository is public, enable private
+   vulnerability reporting (`gh api -X PUT repos/steubens/hass-zafro/private-vulnerability-reporting`),
+   which `SECURITY.md` links to; GitHub does not offer it on private repositories.

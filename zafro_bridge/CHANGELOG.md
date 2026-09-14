@@ -39,6 +39,9 @@
   release whose MQTT climate entity supports horizontal swing (which the
   discovery payload already used).
 - Removed the unused `hassio_api` permission from the add-on manifest.
+- The Supervisor watchdog now uses a Docker health check that requires the
+  add-on to answer HTTPS on its device port, replacing the obsolete TCP-only
+  `watchdog` setting.
 - Documentation: disclaimer, privacy, supported-devices, security, and
   uninstall sections added to `DOCS.md`; new `SECURITY.md` and
   `CONTRIBUTING.md`; issue and pull-request templates added.

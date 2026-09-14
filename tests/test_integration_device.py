@@ -885,3 +885,36 @@ async def _scenario_concurrent_fallbacks_answer_each_frame_once(cert_path: Path,
 
 def test_concurrent_relay_fallbacks_answer_each_pending_frame_exactly_once(tls_cert_pair: tuple[Path, Path]) -> None:
     run(_scenario_concurrent_fallbacks_answer_each_frame_once(*tls_cert_pair))
+
+
+# =============================================================================
+# Container health check
+# =============================================================================
+async def _scenario_health_check_endpoint(cert_path: Path, key_path: Path, port: int) -> None:
+    import shutil
+
+    settings = make_settings(port=port, cert_path=cert_path, key_path=key_path)
+    recorder = Recorder()
+    async with _running_server(settings, recorder):
+        base_url = f"https://{settings.listen_host}:{settings.listen_port}"
+        async with aiohttp.ClientSession() as client:
+            async with client.get(f"{base_url}/healthz", ssl=False) as response:
+                assert response.status == 200
+                assert await response.text() == "ok"
+            # Everything else still mimics the vendor cloud's 404.
+            async with client.get(f"{base_url}/anything-else", ssl=False) as response:
+                assert response.status == 404
+                assert response.reason == protocol.CLOUD_NOT_FOUND_REASON
+
+        # The exact probe the Dockerfile HEALTHCHECK runs, when curl is available.
+        curl_path = shutil.which("curl")
+        if curl_path is not None:
+            process = await asyncio.create_subprocess_exec(
+                curl_path, "--silent", "--insecure", "--fail", "--max-time", "5",
+                "--output", "/dev/null", f"{base_url}/healthz",
+            )
+            assert await process.wait() == 0
+
+
+def test_health_check_endpoint_answers_ok(tls_cert_pair: tuple[Path, Path], free_tcp_port: int) -> None:
+    run(_scenario_health_check_endpoint(*tls_cert_pair, free_tcp_port))

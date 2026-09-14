@@ -17,6 +17,11 @@ RUN chmod a+x /etc/services.d/zafro-bridge/run /etc/services.d/zafro-bridge/fini
 ENV PYTHONPATH=/usr/src \
     PYTHONUNBUFFERED=1
 
+# Supervisor watchdog: the device endpoint (container port 8443) must complete
+# TLS and answer HTTP, proving the bridge's event loop is responsive.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl --silent --insecure --fail --max-time 5 --output /dev/null https://127.0.0.1:8443/healthz || exit 1
+
 LABEL \
     org.opencontainers.image.title="Home Assistant Add-on: Zafro Bridge" \
     org.opencontainers.image.description="Local cloud-replacement bridge for Zafro / Rowan smart appliances with MQTT Discovery." \

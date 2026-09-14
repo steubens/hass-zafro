@@ -12,7 +12,6 @@ arch:
   - amd64
 init: false
 startup: services
-boot: auto
 # Device-based MQTT discovery and horizontal swing on MQTT climate need a recent core.
 homeassistant: "2025.3.0"
 services:
@@ -23,7 +22,6 @@ ports_description:
   8443/tcp: >-
     Device endpoint. Redirect the appliance's cloud traffic (zafro.nbrowan.com:443)
     to this port on your Home Assistant host.
-watchdog: "tcp://[HOST]:[PORT:8443]"
 options:
   cloud_relay: true
   cloud_host: zafro.nbrowan.com

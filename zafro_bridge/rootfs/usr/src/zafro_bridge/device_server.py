@@ -6,8 +6,10 @@ Serves exactly the three things the device asks for:
 2. ``GET  /iot1/time/second``   — proxied when relaying, else the local clock
 3. ``GET  /ws/iot1/``           — WebSocket upgrade (subprotocol "mqtt") → DeviceSession
 
-Any other path gets the cloud's own quirky ``404 Not Find`` so the device sees
-nothing unfamiliar. The certificate is self-signed for the cloud hostname; the
+``GET /healthz`` answers ``ok`` for the container's Docker HEALTHCHECK (the
+Supervisor watchdog): completing TLS and HTTP proves the event loop is alive,
+which a bare TCP accept does not. Any other path gets the cloud's own quirky
+``404 Not Find`` so the device sees nothing unfamiliar. The certificate is self-signed for the cloud hostname; the
 appliance does not verify it (that is the whole reason this works).
 
 The number of simultaneous device sessions is capped (``max_device_sessions``)
@@ -36,6 +38,9 @@ _LOGGER = logging.getLogger(__name__)
 # appliance frame would ever need.
 _WEBSOCKET_HEADER_ALLOWANCE = 4096
 
+# Polled by the Dockerfile HEALTHCHECK; not part of the vendor protocol.
+HEALTH_CHECK_PATH = "/healthz"
+
 
 class DeviceServer:
     """aiohttp application bound to the device-facing TLS port."""
@@ -60,6 +65,7 @@ class DeviceServer:
         app.router.add_post(protocol.REST_DEVICE_LOGIN_PATH, self._handle_device_login)
         app.router.add_get(protocol.REST_TIME_PATH, self._handle_time)
         app.router.add_get(protocol.WEBSOCKET_PATH, self._handle_websocket)
+        app.router.add_get(HEALTH_CHECK_PATH, self._handle_health_check)
         app.router.add_route("*", "/{tail:.*}", self._handle_not_found)
         return app
 
@@ -144,6 +150,10 @@ class DeviceServer:
             _LOGGER.warning("Cloud REST proxy for %s returned status %s; answering locally", request.path, status)
             return None
         return web.Response(status=status, body=payload, content_type=content_type.split(";")[0])
+
+    async def _handle_health_check(self, request: web.Request) -> web.StreamResponse:
+        # Deliberately not logged: it is polled every 30 seconds.
+        return web.Response(text="ok", content_type="text/plain")
 
     async def _handle_not_found(self, request: web.Request) -> web.StreamResponse:
         _LOGGER.debug("Unexpected request %s %s from %s", request.method, request.path, request.remote)

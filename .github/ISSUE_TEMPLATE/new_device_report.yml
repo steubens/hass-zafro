@@ -7,22 +7,36 @@ body:
       value: |
         This project tracks which appliances have actually been tested
         against which ones are merely expected to work because they share
-        the same app/platform (see the supported-devices table in the
-        repository README). Reports here are how that list grows.
+        the same app/platform (see the
+        [supported devices table](https://github.com/steubens/hass-zafro#supported-devices)
+        in the repository README). Reports here are how that list grows.
 
         If you're able to capture the appliance's `cmd:5` device-info reply,
-        see the "Capturing a different product" section of `CAPTURE.md` for
-        what's most useful and how to redact it before pasting here.
+        see the
+        [Capturing a different product](https://github.com/steubens/hass-zafro/blob/main/CAPTURE.md#capturing-a-different-product)
+        section of `CAPTURE.md` for what's most useful and how to redact it
+        before pasting here.
 
   - type: input
     id: product-code
     attributes:
       label: Product code
       description: >-
-        From the `cmd:5` device-info reply's `p` field, or the model/product
-        code on the appliance's label or the vendor app.
+        Shown as the device model in Home Assistant once the appliance has
+        connected (e.g. W15491-8K). Also in the `cmd:5` device-info reply's
+        `p` field.
     validations:
       required: true
+
+  - type: input
+    id: model-number
+    attributes:
+      label: Model number (optional)
+      description: >-
+        From the appliance's label, box, or listing, if it differs from the
+        product code (e.g. 54091EWA1 for the tested unit).
+    validations:
+      required: false
 
   - type: input
     id: appliance-type
@@ -31,6 +45,18 @@ body:
       description: e.g. window air conditioner, portable AC, dehumidifier, etc.
     validations:
       required: true
+
+  - type: input
+    id: addon-version
+    attributes:
+      label: Zafro Bridge version
+      description: >-
+        Settings → Apps → Zafro Bridge, shown on the Info tab (Settings →
+        Add-ons on Home Assistant before 2026.2). Leave empty if you only
+        captured the protocol without installing the app.
+      placeholder: "0.1.0"
+    validations:
+      required: false
 
   - type: textarea
     id: works
@@ -53,8 +79,9 @@ body:
     attributes:
       label: Redacted cmd:5 device-info reply (optional but very helpful)
       description: >-
-        The full `{"cmd":5,...}` reply, with `sn` replaced by a same-length
-        placeholder. See `CAPTURE.md`'s "Capturing a different product"
+        The full `{"cmd":5,...}` reply, with `sn` and `ssid` (your Wi-Fi
+        network name) replaced by same-length placeholders. See `CAPTURE.md`'s
+        "Capturing a different product"
         section for how to get this and what else to redact.
       render: json
     validations:

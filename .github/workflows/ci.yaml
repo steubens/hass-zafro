@@ -84,9 +84,10 @@ jobs:
       - name: Run ruff check
         run: uv run --no-project --with ruff -- ruff check .
 
-  # (e) Home Assistant's own add-on manifest/schema linter.
+  # (e) Home Assistant's own app manifest/schema linter (renamed from
+  # action-addon-linter; GitHub does not redirect actions from renamed repos).
   addon-lint:
-    name: Home Assistant add-on linter
+    name: Home Assistant app linter
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -94,8 +95,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Home Assistant add-on linter
-        uses: frenck/action-addon-linter@b9cfd1bc62ba60d2c4fc96317b5f7ada5923f4a7 # v2.21.1
+      - name: Run Home Assistant app linter
+        uses: frenck/action-app-linter@b9cfd1bc62ba60d2c4fc96317b5f7ada5923f4a7 # v2.21.1
         with:
           path: "./zafro_bridge"
 

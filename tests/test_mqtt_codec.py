@@ -20,7 +20,7 @@ import pytest
 from zafro_bridge import mqtt_codec
 
 # Placeholders with the same lengths as the real values (27-char serial, 40-hex creds).
-SERIAL = "6ISEComboWF140ASJ0000000000"
+SERIAL = "TESTMODULEPREFIX00000000000"
 USERNAME = "0123456789abcdef0123456789abcdef01234567"
 PASSWORD = b"fedcba9876543210fedcba9876543210fedcba98"
 

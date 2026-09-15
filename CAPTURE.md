@@ -7,16 +7,17 @@ rooted phone is needed: the **appliance itself** is intercepted.
 
 ## Why device-side
 
-The Zafro app is a Flutter app that ignores user-installed certificates, so
-proxying the phone doesn't work on iOS. The appliance, however, does not
-validate its cloud's TLS certificate at all. Redirect its cloud traffic to a
+The Zafro mobile app is a Flutter app that ignores user-installed
+certificates, so proxying the phone doesn't work on iOS. The appliance,
+however, does not validate its cloud's TLS certificate at all. Redirect its cloud traffic to a
 machine you control, present any certificate, and its traffic is readable.
 
 ## What you need
 
 - A Linux box on your network (a VM or container is fine) with `mitmproxy`.
-- A router that can add a destination-NAT rule for one client (see the router
-  guide in the add-on's `DOCS.md`).
+- A router that can add a destination-NAT rule for one client (see the
+  [router guide](zafro_bridge/DOCS.md#the-router-rule-required) in the app's
+  `DOCS.md`).
 - The appliance's IP address.
 
 ## Steps
@@ -34,7 +35,8 @@ machine you control, present any certificate, and its traffic is readable.
    flush. It is not part of this repository: raw captures contain device
    credentials and account ids, so keep the addon and its output in the
    gitignored `research/` directory (or outside the repo entirely) and never
-   commit them. The reverse proxy keeps the app working during the capture.
+   commit them. The reverse proxy keeps the Zafro mobile app working during
+   the capture.
 
 2. **Redirect the appliance** on your router: from `<appliance IP>`, TCP 443 →
    `<interceptor IP>:443`. If the interceptor is on the *same* subnet as the
@@ -42,8 +44,8 @@ machine you control, present any certificate, and its traffic is readable.
    Then drop the appliance's existing session (clear its conntrack entry or
    power-cycle it) so it reconnects into the interceptor.
 
-3. **Drive the appliance** from the app. Each control appears as a
-   `cmd:6` command on `.../command/request` and its echo on
+3. **Drive the appliance** from the Zafro mobile app. Each control appears as
+   a `cmd:6` command on `.../command/request` and its echo on
    `.../command/reply`.
 
 4. **Remove the redirect** when done; the appliance returns to the cloud.
@@ -79,10 +81,11 @@ enough to confirm the platform behaves the same way:
   product supports — compare it against the state-key table in
   `PROTOCOL.md` to see what's the same and what's different (different
   appliance types, e.g. non-AC products, will have different keys entirely).
-- **One `cmd:4` reply per control you change in the app.** Toggle each
-  control the app exposes for that product (power, mode, setpoint, fan,
-  swing, presets, whatever's relevant) one at a time and capture the reply
-  each produces, so each key's behavior is attributable to a specific action.
+- **One `cmd:4` reply per control you change in the Zafro mobile app.**
+  Toggle each control the mobile app exposes for that product (power, mode,
+  setpoint, fan, swing, presets, whatever's relevant) one at a time and
+  capture the reply each produces, so each key's behavior is attributable to
+  a specific action.
 
 Before sharing anything captured this way, redact:
 

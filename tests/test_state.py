@@ -2,7 +2,7 @@
 
 from zafro_bridge.state import DeviceState
 
-SERIAL = "6ISEComboWF140ASJ0000000000"
+SERIAL = "TESTMODULEPREFIX00000000000"
 
 
 def test_snapshot_then_delta_then_info():

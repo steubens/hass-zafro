@@ -6,7 +6,7 @@ import pytest
 
 from zafro_bridge import protocol
 
-SERIAL = "6ISEComboWF140ASJ0000000000"
+SERIAL = "TESTMODULEPREFIX00000000000"
 
 
 def test_topics_and_serial_extraction():

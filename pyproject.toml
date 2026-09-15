@@ -1,7 +1,7 @@
 [project]
 name = "zafro-bridge"
 version = "0.1.0"
-description = "Home Assistant add-on: local, cloud-independent control of Zafro / Rowan smart appliances."
+description = "Home Assistant app (formerly add-on): local, cloud-independent control of Zafro window air conditioners."
 requires-python = ">=3.13"
 license = { text = "MIT" }
 

@@ -6,7 +6,7 @@ from zafro_bridge.state import DeviceState
 
 from zafro_bridge import ha_discovery, protocol
 
-SERIAL = "6ISEComboWF140ASJ0000000000"
+SERIAL = "TESTMODULEPREFIX00000000000"
 
 
 def _payload():

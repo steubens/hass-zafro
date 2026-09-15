@@ -1,48 +1,58 @@
-# Home Assistant Add-on: Zafro Bridge
+# Home Assistant App: Zafro Bridge
 
 Local, cloud-independent control of Zafro / Rowan smart window air
 conditioners, integrated into Home Assistant through MQTT Discovery, with the
-official Zafro app still working. Other appliances that use the Zafro app may
+official Zafro mobile app still working. Other Zafro air conditioners may
 work but are untested (see [Supported devices](#supported-devices)).
+
+Zafro Bridge is a Home Assistant **app**. Home Assistant called apps
+*add-ons* before release 2026.2, so older guides and forum posts use that
+name. In these docs, "the app" means Zafro Bridge, and the vendor's phone app
+is always called the **Zafro mobile app**.
 
 ## How it works
 
 These appliances have no local API. Each one keeps an outbound, encrypted
-connection to the vendor cloud (`zafro.nbrowan.com`), and the app only ever
-talks to that cloud. The appliance, however, does **not** verify the cloud's
-TLS certificate. This add-on takes advantage of that:
+connection to the vendor cloud (`zafro.nbrowan.com`), and the Zafro mobile app
+only ever talks to that cloud. The appliance, however, does **not** verify the
+cloud's TLS certificate. This app takes advantage of that:
 
 1. You add one rule on your router that redirects the appliance's cloud traffic
-   to this add-on instead.
-2. The add-on presents itself as the cloud. The appliance connects and speaks
+   to this app instead.
+2. The app presents itself as the cloud. The appliance connects and speaks
    its normal protocol (MQTT over WebSocket).
-3. The add-on publishes the appliance to Home Assistant via MQTT Discovery and
+3. The app publishes the appliance to Home Assistant via MQTT Discovery and
    relays your commands back to it, entirely on your LAN.
-4. Optionally (default on), the add-on also relays the appliance's traffic to
-   the real vendor cloud, so the Zafro app keeps working exactly as before.
+4. Optionally (default on), the app also relays the appliance's traffic to
+   the real vendor cloud, so the Zafro mobile app keeps working exactly as
+   before.
 
-If your internet or the vendor cloud is down, the add-on answers the appliance
-itself and Home Assistant control keeps working. Only the app is affected,
-because the app is inherently cloud-based.
+If your internet or the vendor cloud is down, the app answers the appliance
+itself and Home Assistant control keeps working. Only the Zafro mobile app is
+affected, because it is inherently cloud-based.
 
 ## Disclaimer
 
-This add-on is **not affiliated with, endorsed by, or supported by** Zafro,
+This app is **not affiliated with, endorsed by, or supported by** Zafro,
 Rowan Electric Appliance, i4season, or any of their affiliates. Product and
 platform names are used only to identify which appliances it is compatible
 with. The protocol it speaks was reverse-engineered from the author's own
 appliance, for personal interoperability with hardware already purchased, and
-is documented in `PROTOCOL.md`.
+is documented in the repository's
+[`PROTOCOL.md`](https://github.com/steubens/hass-zafro/blob/main/PROTOCOL.md).
 
 This software is provided **as-is**, under the MIT license (see the
-repository's `LICENSE`), with no warranty of any kind. Use it at your own
+repository's [`LICENSE`](https://github.com/steubens/hass-zafro/blob/main/LICENSE)),
+with no warranty of any kind. Use it at your own
 risk: redirecting an appliance's cloud traffic and impersonating the vendor's
 server may conflict with the vendor's terms of service or affect your
 appliance's warranty.
 
 ## Supported devices
 
-See the [supported devices table](https://github.com/steubens/hass-zafro#supported-devices)
+Only one appliance has been tested so far: a Zafro 12,000 BTU U-shaped window
+AC, model `54091EWA1`, product code `W15491-8K`. See the
+[supported devices table](https://github.com/steubens/hass-zafro#supported-devices)
 in the repository README for what has actually been tested versus what is
 expected to work. If your appliance works (or doesn't), please
 [report it](https://github.com/steubens/hass-zafro/issues/new?template=new_device_report.yml) —
@@ -53,42 +63,48 @@ it's the only way the "expected to work" list grows.
 What leaves your network depends on the `cloud_relay` option:
 
 - **`cloud_relay: true` (default).** The appliance's connection is relayed to
-  the vendor cloud exactly as if the add-on weren't there. Everything the
+  the vendor cloud exactly as if the app weren't there. Everything the
   appliance would normally send still reaches the vendor: its full state
   (mode, setpoints, sensors), Wi-Fi SSID and signal strength, firmware
   versions, and fault codes. The appliance's login (`device/login`) also still
   goes to the vendor. Commands from Home Assistant go straight to the
   appliance, but the appliance reports each resulting change to the vendor as
   usual, echoing the `hass_bridge` tag the bridge puts on its commands, so the
-  vendor can tell those changes came through this add-on. The bridge's
+  vendor can tell those changes came through this app. The bridge's
   periodic state and info requests (every `state_refresh_seconds` /
   `info_refresh_seconds`) also make the appliance send full snapshots, which
   reach the vendor too.
-- **`cloud_relay: false`.** Nothing leaves your network — the add-on answers
+- **`cloud_relay: false`.** Nothing leaves your network — the app answers
   the appliance itself and never contacts the vendor. The trade-off is that
-  the official Zafro app stops working, because the app only ever talks to
+  the official Zafro mobile app stops working, because it only ever talks to
   the vendor cloud.
 
-The add-on itself sends data to exactly two places: the vendor relay (only
+The app itself sends data to exactly two places: the vendor relay (only
 when `cloud_relay` is on) and your configured MQTT broker. It does not phone
 home, collect telemetry, or talk to anything else.
 
 ## Requirements
 
-- Home Assistant OS or Supervised (this is an add-on).
-- The **Mosquitto broker** add-on installed and the **MQTT** integration set up
-  (the add-on finds the broker automatically). Any other broker works too via
+- Home Assistant 2025.3 or newer, installed as Home Assistant OS. Apps are
+  only available on Home Assistant OS; the Supervised installation method is
+  no longer supported.
+- The **Mosquitto broker** app installed and the **MQTT** integration set up
+  (the app finds the broker automatically). Any other broker works too via
   the optional `mqtt_*` settings.
-- Your appliance already set up in the Zafro app (joined to Wi-Fi). The add-on
-  does not do Wi-Fi pairing.
+- Your appliance already set up in the Zafro mobile app (joined to Wi-Fi). The
+  app does not do Wi-Fi pairing.
 - A router where you can add a NAT (port redirect) rule. Instructions below.
 
 ## Installation
 
-1. Add this repository to the add-on store: **Settings → Add-ons → Add-on
-   store → ⋮ → Repositories**, paste the repository URL.
-2. Install **Zafro Bridge** and start it. The defaults are correct for Zafro.
-3. Open the add-on **Log**. You should see it listening on port 8443 and
+1. Add this repository to Home Assistant: go to **Settings → Apps**, select
+   **Install app**, then in the ⋮ menu (top right) select **Repositories**.
+   Paste `https://github.com/steubens/hass-zafro` and select **Add**. (On
+   Home Assistant before 2026.2, where apps were called add-ons: **Settings →
+   Add-ons → Add-on store → ⋮ → Repositories**.)
+2. Install **Zafro Bridge** from the app store and start it. The defaults are
+   correct for Zafro.
+3. Open the app's **Log** tab. You should see it listening on port 8443 and
    connected to MQTT.
 4. Add the router rule (next section). Within a minute the log shows
    `device CONNECT` and the appliance appears in **Settings → Devices &
@@ -96,8 +112,9 @@ home, collect telemetry, or talk to anything else.
 
    A healthy first connection looks like this at the default `info` log
    level. The lines to look for are `device CONNECT` (the appliance reached
-   the add-on) and `Published discovery` (Home Assistant will pick it up);
-   `relaying to` appears only with `cloud_relay` on:
+   the app) and `Published discovery` (Home Assistant will pick it up);
+   `relaying to` appears only with `cloud_relay` on (its "app stays
+   functional" refers to the Zafro mobile app):
 
    ```
    09:02:34 INFO    __main__: Zafro Bridge 0.1.0 starting
@@ -117,16 +134,16 @@ home, collect telemetry, or talk to anything else.
 
 ## The router rule (required)
 
-The appliance uses DNS servers baked into its firmware, so a DNS override on
-your network will not redirect it. A NAT rule on the router is the reliable
-way. The rule redirects the appliance's outbound **TCP port 443** to the
-add-on's port (**8443** by default) on your Home Assistant host.
+The tested appliance uses DNS servers built into its firmware, so a DNS
+override on your network does not redirect it. A NAT rule on the router is
+the reliable way. The rule redirects the appliance's outbound **TCP port
+443** to the app's port (**8443** by default) on your Home Assistant host.
 
 You need two facts:
 
 - **The appliance's IP.** Find it in your router's client list; its MAC
   address starts with `00:1c:c2`. Give it a DHCP reservation so the rule keeps
-  matching. (The add-on log also prints the source IP on `Device login`.)
+  matching. (The app's log also prints the source IP on `Device login`.)
 - **Your Home Assistant host IP.**
 
 If you have more than one appliance, repeat the whole rule (and, per below,
@@ -144,8 +161,8 @@ NAT entry.
 > [If the appliance and Home Assistant are on the same subnet](#if-the-appliance-and-home-assistant-are-on-the-same-subnet)
 > below. Appliances on a separate VLAN from Home Assistant don't need this.
 >
-> One side effect: under a source-NAT/hairpin rule, the add-on log's logged
-> source IP for the connection is the **router's** address, not the
+> One side effect: under a source-NAT/hairpin rule, the source IP in the
+> app's log for the connection is the **router's** address, not the
 > appliance's — that's expected and doesn't mean the wrong device connected.
 
 Redirecting *all* of the appliance's port-443 traffic is recommended: it
@@ -155,7 +172,7 @@ they would be blocked while the rule is active; disable the rule temporarily
 in that case.)
 
 In every example below, replace `AC_IP` with the appliance's IP and `HA_IP`
-with your Home Assistant host's IP. If you changed the add-on's host port,
+with your Home Assistant host's IP. If you changed the app's host port,
 replace `8443` too.
 
 ### UniFi — Dream Machine / Cloud Gateway / UXG (UniFi OS, current)
@@ -345,39 +362,43 @@ preference:
   for just the appliance's Wi-Fi. Most travel-router firmware (GL.iNet,
   OpenWrt-based units, etc.) supports port forwarding, so the appliance joins
   that router's own subnet and gets NAT'd from there.
-- **Wait.** Without one of the above, this add-on can't intercept the
+- **Wait.** Without one of the above, this app can't intercept the
   appliance's traffic.
 
 A DNS override (e.g. a Pi-hole entry or router DNS rewrite for
-`zafro.nbrowan.com`) does **not** work as a substitute: the appliance's
-firmware uses hard-coded DNS servers and ignores whatever your network hands
-out, so redirecting the hostname does nothing. Only a NAT rule that
-intercepts the appliance's traffic by IP and port works.
+`zafro.nbrowan.com`) did **not** work on the tested appliance: its firmware
+uses hard-coded DNS servers and ignores whatever your network hands out, so
+redirecting the hostname does nothing. A NAT rule that intercepts the
+appliance's traffic by IP and port is the method this app supports. Other
+models or firmware versions may honor your network's DNS; that is untested
+here, and because the appliance would then connect to port 443 directly, the
+app's host port would also have to be 443.
 
 ### Verifying
 
-The add-on log shows `Device login from …` and `device CONNECT` when the
+The app's log shows `Device login from …` and `device CONNECT` when the
 appliance arrives, then `Published discovery`. If nothing appears within a
 minute, drop the appliance's existing cloud session (clear its conntrack entry
 on the router, or power-cycle the unit) so it reconnects into the rule. The
-Zafro app should still control the unit (with `cloud_relay` on).
+Zafro mobile app should still control the unit (with `cloud_relay` on).
 
 ## Configuration
 
 | Option | Default | Description |
 |---|---|---|
-| `cloud_relay` | `true` | Relay to the vendor cloud so the official app keeps working. Off = fully offline. |
+| `cloud_relay` | `true` | Relay to the vendor cloud so the official Zafro mobile app keeps working. Off = fully offline. |
 | `cloud_host` | `zafro.nbrowan.com` | Vendor cloud hostname to relay to. |
 | `tls_hostname` | `zafro.nbrowan.com` | Name on the self-signed certificate shown to the appliance. |
 | `discovery_prefix` | `homeassistant` | Home Assistant MQTT discovery prefix. |
 | `state_refresh_seconds` | `300` | How often to request a full state snapshot from each appliance. |
 | `info_refresh_seconds` | `900` | How often to refresh Wi-Fi signal and firmware info. |
-| `log_level` | `info` | Add-on log verbosity. `debug` logs every MQTT packet type. |
-| `allowed_serials` | *(empty list)* | Restrict which appliances the add-on will accept, by serial number. Empty (the default) accepts any appliance that connects. See [Security](#security) for how to find a serial and why you'd set this. |
-| `mqtt_host`, `mqtt_port`, `mqtt_username`, `mqtt_password` | *(empty)* | Optional broker override. Leave empty to use the Mosquitto add-on. |
+| `log_level` | `info` | Log verbosity. `debug` logs every MQTT packet type. |
+| `allowed_serials` | *(empty list)* | Restrict which appliances the app will accept, by serial number. Empty (the default) accepts any appliance that connects. See [Security](#security) for how to find a serial and why you'd set this. |
+| `mqtt_host`, `mqtt_port`, `mqtt_username`, `mqtt_password` | *(empty)* | Optional broker override. Leave empty to use the Mosquitto broker app. |
 
-The container listens on port 8443; change the **host** port in the add-on's
-Network section if 8443 is taken, and use that port in your router rule.
+The container listens on port 8443. If 8443 is taken on your host, change the
+**host** port on the app's **Configuration** tab, under **Network**, and use
+that port in your router rule.
 
 ## What you get in Home Assistant
 
@@ -391,12 +412,13 @@ One device per appliance, with:
 - **Diagnostic sensors**: Wi-Fi signal, Wi-Fi network, Module firmware,
   MCU firmware, Runtime, Filter counter, Fault code.
 
-Behaviour notes, matching the appliance and its app:
+Behaviour notes, matching the appliance and the Zafro mobile app:
 
 - Each mode remembers its own setpoint and fan speed; switching modes recalls them.
-- Choosing a numbered or Auto fan speed clears Eco/Sleep, exactly as the app does.
-  "Extra" is the appliance's boost fan setting.
-- In Dry mode the app offers no fan control; the bridge does not enforce this.
+- Choosing a numbered or Auto fan speed clears Eco/Sleep, exactly as the Zafro
+  mobile app does. "Extra" is the appliance's boost fan setting.
+- In Dry mode the Zafro mobile app offers no fan control; the bridge does not
+  enforce this.
 - There is no Auto HVAC mode on these units; "Auto" exists only for the fan.
 
 ## Troubleshooting
@@ -406,10 +428,10 @@ Behaviour notes, matching the appliance and its app:
   session (conntrack, or power-cycle the unit). If the appliance and Home
   Assistant are on the same subnet, confirm the hairpin/source-NAT rule is
   also in place (see [above](#the-router-rule-required)) — without it the
-  appliance's SYN reaches the add-on but the reply never finds its way back.
+  appliance's SYN reaches the app but the reply never finds its way back.
 - **NAT rule matches too broadly.** A rule scoped to the whole subnet (rather
   than the appliance's specific IP) can also catch the Home Assistant host's
-  own outbound traffic on port 443, including the add-on's own relay
+  own outbound traffic on port 443, including the app's own relay
   connection to the vendor cloud — looping it back to itself instead of
   reaching the internet. Symptoms look like `cloud unreachable` or a relay
   that never connects even though the internet is fine. Scope the rule to the
@@ -418,36 +440,35 @@ Behaviour notes, matching the appliance and its app:
   the path is altering the WebSocket. The bridge disables WebSocket
   compression deliberately; a proxy or firewall that re-enables it or
   rewrites frames can cause this. Connect the appliance to the bridge directly.
-- **Log says no MQTT broker.** Install/start the Mosquitto add-on, or fill in
-  the `mqtt_*` options.
-- **Device appears but the app stopped working.** Check `cloud_relay` is on and
-  the add-on host can reach the internet; the log reports `cloud unreachable`
-  if the relay could not connect.
+- **Log says no MQTT broker.** Install/start the **Mosquitto broker** app, or
+  fill in the `mqtt_*` options.
+- **Device appears but the Zafro mobile app stopped working.** Check
+  `cloud_relay` is on and the Home Assistant host can reach the internet; the
+  log reports `cloud unreachable` if the relay could not connect.
 - **AppArmor denials** (`apparmor="DENIED"` in the host journal). Please report
   them with the log line; the profile only includes Home Assistant's standard
-  add-on base abstraction (see [Security](#security)), so a denial likely
-  means the add-on needs an adjustment, not that something unexpected is
-  being blocked.
+  base abstraction (see [Security](#security)), so a denial likely means the
+  app needs an adjustment, not that something unexpected is being blocked.
 - **Remove an appliance from Home Assistant.** Remove its router rule first,
   then delete the MQTT device in Settings → Devices & services. While the
-  appliance can still reach the add-on, the bridge publishes it again the next
-  time it connects (or the add-on reconnects to the MQTT broker).
+  appliance can still reach the app, the bridge publishes it again the next
+  time it connects (or the app reconnects to the MQTT broker).
 
-## What happens when the add-on stops
+## What happens when the app stops
 
 While the router NAT rule is in place, the appliance's port-443 traffic is
-unconditionally pointed at the add-on — that's true whether the add-on is
-running or not. So while the rule exists but the add-on is stopped, crashed,
-or being reinstalled, the appliance can't reach **any** cloud: local control
-through Home Assistant stops, and so does the official Zafro app, until the
-add-on (or the rule) comes back. This is the same trade-off as any local
-cloud-replacement: the add-on becomes a single point of failure for that
+unconditionally pointed at the app — that's true whether the app is running
+or not. So while the rule exists but the app is stopped, crashed, or being
+reinstalled, the appliance can't reach **any** cloud: local control through
+Home Assistant stops, and so does the official Zafro mobile app, until the
+app (or the rule) comes back. This is the same trade-off as any local
+cloud-replacement: the app becomes a single point of failure for that
 appliance's connectivity in exchange for not depending on the internet for
 local control the rest of the time.
 
 ## Uninstalling
 
-To remove the add-on and hand the appliance back to the vendor cloud, in this
+To remove the app and hand the appliance back to the vendor cloud, in this
 order:
 
 1. **Remove the router NAT rule** (and its hairpin/source-NAT counterpart, if
@@ -456,17 +477,19 @@ order:
    reconnects straight to the real vendor cloud.
 3. **Delete the device in Home Assistant**: Settings → Devices & services →
    MQTT → the appliance's device → Delete.
-4. **Uninstall the add-on**: Settings → Add-ons → Zafro Bridge → Uninstall.
+4. **Uninstall the app**: Settings → Apps → Zafro Bridge → Uninstall (on
+   Home Assistant before 2026.2: Settings → Add-ons → Zafro Bridge →
+   Uninstall).
 
 Optionally, clear any leftover retained MQTT topics under `zafro/` (and the
 `homeassistant/device/...` discovery topic, if it wasn't already removed by
-step 3) with a tool like [MQTT Explorer](http://mqtt-explorer.com/) — retained
+step 3) with a tool like [MQTT Explorer](https://mqtt-explorer.com/) — retained
 messages otherwise sit on the broker indefinitely.
 
 ## Security
 
 **The device endpoint (port 8443) is unauthenticated by default.** The
-add-on has no way to verify the credentials the vendor issues to each
+app has no way to verify the credentials the vendor issues to each
 appliance, so out of the box, anything on your network that can reach port
 8443 and sends a well-formed `dev_<serial>` CONNECT is treated as an
 appliance. Two things narrow that:
@@ -474,7 +497,7 @@ appliance. Two things narrow that:
 - **Set `allowed_serials`** (see [Configuration](#configuration)) to the
   serial number(s) of your own appliance(s). Once set, a CONNECT for any
   other serial is refused and the connection is closed immediately. Find your
-  appliance's serial either in the add-on log on its first connection, or on
+  appliance's serial either in the app's log on its first connection, or on
   its device page in Home Assistant (Settings → Devices & services → MQTT →
   the appliance's device) once it has connected once with `allowed_serials`
   still empty. This is a filter, not authentication: a client that knows an
@@ -486,17 +509,19 @@ appliance. Two things narrow that:
 
 Other relevant behavior:
 
-- The add-on does not use host networking, runs under an AppArmor profile,
+- The app does not use host networking, runs under an AppArmor profile,
   and needs only the Supervisor MQTT service (no Supervisor API access). The
-  AppArmor profile follows Home Assistant's add-on template, which grants
-  general file access so the s6 process supervisor can start the add-on; it
+  AppArmor profile follows Home Assistant's app template, which grants
+  general file access so the s6 process supervisor can start the app; it
   limits signals and network families but is not a filesystem sandbox.
 - The TLS listener on 8443 intentionally accepts old, otherwise-deprecated TLS
   versions and ciphers, because the appliance's embedded TLS stack requires
   them to connect at all. The appliance does not validate the certificate it
-  is shown (see `PROTOCOL.md`), so the listener's certificate is self-signed,
-  generated on first start into the add-on's private `/data` folder, and
-  never needs to be trusted by anything but the appliance.
+  is shown (see
+  [`PROTOCOL.md`](https://github.com/steubens/hass-zafro/blob/main/PROTOCOL.md)),
+  so the listener's certificate is self-signed, generated on first start into
+  the app's private `/data` folder, and never needs to be trusted by anything
+  but the appliance.
 - Your Zafro account credentials are never needed. The appliance's own device
   credentials pass through the relay untouched and are not stored.
 - **Idle connections are detected.** An appliance that goes silent for more
@@ -504,18 +529,19 @@ Other relevant behavior:
   keepalive) is marked unavailable in Home Assistant rather than left
   showing stale state indefinitely.
 - **A cap limits concurrent device sessions** so a misbehaving or malicious
-  client can't exhaust the add-on's resources by opening unbounded
+  client can't exhaust the app's resources by opening unbounded
   connections; this uses a built-in default and is not currently exposed as
-  an add-on option.
+  an app option.
 - **Relay auto-recovery.** When `cloud_relay` is on but the appliance is being
   served locally (the vendor cloud was unreachable at connect time, or the
-  relay dropped later), the add-on probes the cloud every 5 minutes. Once it's
-  reachable again, the add-on closes the appliance's connection so it
+  relay dropped later), the app probes the cloud every 5 minutes. Once it's
+  reachable again, the app closes the appliance's connection so it
   reconnects through the relay instead. (If the cloud actively refuses the
-  appliance's login, the add-on stays local for that connection instead.) Home Assistant sees a brief offline/online blip
-  for that appliance when this happens — that's expected, not a fault.
+  appliance's login, the app stays local for that connection instead.) Home
+  Assistant sees a brief offline/online blip for that appliance when this
+  happens — that's expected, not a fault.
 - **A bridge-level availability topic** (in addition to each device's own
-  availability) has a last-will set on the broker, so if the add-on itself
+  availability) has a last-will set on the broker, so if the app itself
   dies unexpectedly, every entity for every appliance goes unavailable rather
   than silently showing stale state.
 
@@ -524,8 +550,9 @@ Other relevant behavior:
 Issues and feature requests: the [repository issue
 tracker](https://github.com/steubens/hass-zafro/issues), using the templates
 provided — a [bug report](https://github.com/steubens/hass-zafro/issues/new?template=bug_report.yml)
-or a [new device report](https://github.com/steubens/hass-zafro/issues/new?template=new_device_report.yml).
-Before posting, please:
+or a [new device report](https://github.com/steubens/hass-zafro/issues/new?template=new_device_report.yml)
+(use the new device report whenever you try an appliance other than the
+tested model, whether it works or not). Before posting a bug report, please:
 
 - Set `log_level: debug` and reproduce the problem, then include the relevant
   log excerpt. The bridge redacts obviously sensitive values (Wi-Fi SSID,
@@ -542,4 +569,5 @@ in the repository root for how to report those privately.
 
 ## License
 
-MIT.
+MIT; see the repository's
+[`LICENSE`](https://github.com/steubens/hass-zafro/blob/main/LICENSE).

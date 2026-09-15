@@ -1,4 +1,4 @@
-# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
+# https://developers.home-assistant.io/docs/apps/configuration#app-dockerfile
 ARG BUILD_FROM=ghcr.io/home-assistant/base-python:3.13-alpine3.24
 FROM ${BUILD_FROM}
 
@@ -23,7 +23,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl --silent --insecure --fail --max-time 5 --output /dev/null https://127.0.0.1:8443/healthz || exit 1
 
 LABEL \
-    org.opencontainers.image.title="Home Assistant Add-on: Zafro Bridge" \
+    org.opencontainers.image.title="Home Assistant App: Zafro Bridge" \
     org.opencontainers.image.description="Local cloud-replacement bridge for Zafro / Rowan smart appliances with MQTT Discovery." \
     org.opencontainers.image.source="https://github.com/steubens/hass-zafro" \
     org.opencontainers.image.licenses="MIT"

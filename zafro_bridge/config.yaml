@@ -1,11 +1,11 @@
-# https://developers.home-assistant.io/docs/add-ons/configuration
+# https://developers.home-assistant.io/docs/apps/configuration
 name: Zafro Bridge
 version: "0.1.0"
 slug: zafro_bridge
 description: >-
   Local, cloud-independent control of Zafro / Rowan smart window air
-  conditioners via Home Assistant MQTT Discovery, while keeping the official
-  app working. Other Zafro app appliances may work but are untested.
+  conditioners via Home Assistant MQTT Discovery, while keeping the Zafro
+  mobile app working. Other Zafro air conditioners may work but are untested.
 url: https://github.com/steubens/hass-zafro/tree/main/zafro_bridge
 arch:
   - aarch64

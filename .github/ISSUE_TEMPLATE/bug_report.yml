@@ -5,23 +5,32 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filing, please check the log at `debug` level (Configuration
-        → `log_level: debug`) — most issues are visible there. See the
-        "Getting help" section of `zafro_bridge/DOCS.md` for what's safe to
-        paste: the bridge redacts Wi-Fi SSID and account/client identifiers
-        from device payloads before logging them, but serial numbers and
-        appliance state are logged in full — review before pasting if you'd
-        rather keep those private too.
+        Before filing, please check the log at `debug` level (the app's
+        **Configuration** tab → `log_level: debug`, then the **Log** tab) —
+        most issues are visible there. See the
+        [Getting help](https://github.com/steubens/hass-zafro/blob/main/zafro_bridge/DOCS.md#getting-help)
+        section of the documentation for what's safe to paste: the bridge
+        redacts Wi-Fi SSID and account/client identifiers from device
+        payloads before logging them, but serial numbers and appliance state
+        are logged in full — review before pasting if you'd rather keep those
+        private too.
+
+        Trying an appliance other than the tested model? A
+        [new device report](https://github.com/steubens/hass-zafro/issues/new?template=new_device_report.yml)
+        is the better fit.
 
         If this is a security vulnerability rather than a bug, please use
-        [private reporting](../../security/advisories/new) instead — see
-        `SECURITY.md`.
+        [private reporting](https://github.com/steubens/hass-zafro/security/advisories/new)
+        instead — see
+        [SECURITY.md](https://github.com/steubens/hass-zafro/blob/main/SECURITY.md).
 
   - type: input
     id: addon-version
     attributes:
-      label: Add-on version
-      description: Settings → Add-ons → Zafro Bridge → shown at the top.
+      label: Zafro Bridge version
+      description: >-
+        Settings → Apps → Zafro Bridge, shown on the Info tab (Settings →
+        Add-ons on Home Assistant before 2026.2).
       placeholder: "0.1.0"
     validations:
       required: true
@@ -31,7 +40,7 @@ body:
     attributes:
       label: Home Assistant version
       description: Settings → About.
-      placeholder: "2025.9.1"
+      placeholder: "2026.9.0"
     validations:
       required: true
 
@@ -48,7 +57,7 @@ body:
     attributes:
       label: cloud_relay
       options:
-        - "true (default) — vendor app also expected to work"
+        - "true (default) — Zafro mobile app also expected to work"
         - "false — fully offline"
     validations:
       required: true

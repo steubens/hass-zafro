@@ -1,8 +1,8 @@
 # Zafro / Rowan (nbrowan) appliance protocol
 
 Reverse-engineered 2026-09-13 by intercepting a Zafro 12,000 BTU U-shaped
-window AC (heat+cool, model 54091EWA1, product code `W15491-8K`, Wi-Fi module
-serial prefix `6ISEComboWF140ASJ…`). Capture was done device-side (the device
+window AC (heat+cool, model 54091EWA1, product code `W15491-8K`, an i4season
+"Combo" Wi-Fi module). Capture was done device-side (the device
 connects out to the vendor cloud), so this is the exact protocol the
 **appliance** speaks. See `CAPTURE.md` for the method.
 

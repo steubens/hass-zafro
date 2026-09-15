@@ -1,6 +1,6 @@
 # Zafro Bridge — project guide for Claude Code
 
-Home Assistant **add-on** that gives local, cloud-independent control of Zafro /
+Home Assistant **app** (called an add-on before HA 2026.2) that gives local, cloud-independent control of Zafro /
 Rowan (i4season-platform) smart appliances. It impersonates the vendor cloud on
 the LAN, relays to the real cloud so the official app keeps working, and
 exposes everything to Home Assistant via MQTT device discovery.
@@ -58,7 +58,7 @@ never in the network layers.
   Lint: `uv run --no-project --with ruff -- ruff check .`
 - Testing against a real Home Assistant uses the **local add-on** flow: copy
   `zafro_bridge/` to the HA host's `/addons/zafro_bridge`, then
-  `ha apps reload`, `ha apps install local_zafro_bridge`, later
+  `ha store reload`, `ha apps install local_zafro_bridge`, later
   `ha apps rebuild local_zafro_bridge` + `ha apps restart ...`, and read
   `ha apps logs local_zafro_bridge`. Set the `log_level` option to `debug` to
   see every MQTT packet type. The appliance must be redirected to the add-on

@@ -1,8 +1,13 @@
 # Contributing
 
 Thanks for considering a contribution. This is a small, single-maintainer
-add-on, so keep changes focused; for anything larger than a small fix, open
-an issue first to discuss the approach.
+Home Assistant app (formerly called an add-on), so keep changes focused; for
+anything larger than a small fix, open an issue first to discuss the
+approach.
+
+Not a code change? Reports that a different appliance works (or doesn't) are
+just as valuable: use the
+[new device report](https://github.com/steubens/hass-zafro/issues/new?template=new_device_report.yml).
 
 ## Dev setup
 
@@ -26,7 +31,7 @@ Async tests are driven with plain `asyncio.run(...)` inside ordinary test
 functions — this project doesn't use `pytest-asyncio` or any other pytest
 plugin.
 
-Byte-compile check and lint (CI runs both, plus the Home Assistant add-on
+Byte-compile check and lint (CI runs both, plus the Home Assistant app
 linter and a Docker build for both architectures):
 
 ```bash
@@ -35,7 +40,7 @@ ruff check .
 ```
 
 No appliance? `tests/fake_appliance.py` simulates one. Run it against a
-local or installed add-on with
+local or installed copy of the app with
 `python tests/fake_appliance.py --host <ha-host> --port 8443` (with
 `zafro_bridge/rootfs/usr/src` on `PYTHONPATH`).
 
@@ -54,12 +59,13 @@ local or installed add-on with
 ## Changing the protocol
 
 If a change touches how the bridge talks to the appliance, update
-`PROTOCOL.md`, `protocol.py`, and the relevant tests **together**, in the
-same change. `PROTOCOL.md` is the authoritative reference — code and docs
-drifting apart is worse than either being incomplete.
+[`PROTOCOL.md`](PROTOCOL.md), `protocol.py`, and the relevant tests
+**together**, in the same change. `PROTOCOL.md` is the authoritative
+reference — code and docs drifting apart is worse than either being
+incomplete.
 
 If you're reverse-engineering a new control or a different product to do
-this, see `CAPTURE.md`.
+this, see [`CAPTURE.md`](CAPTURE.md).
 
 ## Never commit captures or site-specific data
 
@@ -74,19 +80,19 @@ belong in a public repository. Before committing:
 - Test vectors and examples should use placeholder values of the same shape
   as real ones (`sn`, `clientId`, tokens, etc.), never real captured data.
 - A quick self-check before pushing:
-  `grep -rnIE "10\.[0-9]+\.[0-9]+\.[0-9]+|[0-9a-f]{32}|[0-9a-f]{40}" --exclude-dir=.git .`
+  `grep -rnIE "10\.[0-9]+\.[0-9]+\.[0-9]+|[0-9a-f]{32}|[0-9a-f]{40}" --exclude-dir=.git --exclude-dir=research .`
   should show nothing real (the pinned action SHAs in `.github/workflows` and
   the obviously sequential hex placeholders in the codec tests are expected).
 
 ## Versioning
 
 This project follows semantic versioning loosely, applied to what a Home
-Assistant user of the add-on actually experiences:
+Assistant user of the app actually experiences:
 
 - **Breaking (major bump)**: renamed entity `unique_id`s (forces users to
   re-link entities), a discovery or state MQTT topic layout change, or a
-  removed add-on option.
-- **Feature (minor bump)**: new add-on options, new entities, new supported
+  removed app option.
+- **Feature (minor bump)**: new app options, new entities, new supported
   behavior.
 - **Fix (patch bump)**: bug fixes that don't change the two things above.
 

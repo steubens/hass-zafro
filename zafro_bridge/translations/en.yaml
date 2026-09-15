@@ -2,9 +2,9 @@ configuration:
   cloud_relay:
     name: Relay to vendor cloud
     description: >-
-      Keep the official Zafro app working by relaying the appliance's traffic to
-      the vendor cloud. Turn off for a fully offline setup (the app will stop
-      working; Home Assistant control is unaffected).
+      Keep the official Zafro mobile app working by relaying the appliance's
+      traffic to the vendor cloud. Turn off for a fully offline setup (the
+      mobile app will stop working; Home Assistant control is unaffected).
   cloud_host:
     name: Cloud host
     description: The vendor cloud hostname to relay to. Leave at the default unless the vendor changes it.
@@ -24,10 +24,10 @@ configuration:
     description: How often to refresh Wi-Fi signal and firmware information.
   log_level:
     name: Log level
-    description: Verbosity of the add-on log.
+    description: Verbosity of the app's log.
   mqtt_host:
     name: MQTT host (optional)
-    description: Override the broker host. Leave empty to use the Mosquitto add-on automatically.
+    description: Override the broker host. Leave empty to use the Mosquitto broker app automatically.
   mqtt_port:
     name: MQTT port (optional)
     description: Override the broker port.

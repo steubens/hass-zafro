@@ -6,7 +6,7 @@
 # bridge. s6-overlay docs: https://github.com/just-containers/s6-overlay
 # ==============================================================================
 
-declare mqtt_host mqtt_port mqtt_username mqtt_password mqtt_ssl tls_hostname allowed_serials
+declare mqtt_host mqtt_port mqtt_username mqtt_password mqtt_ssl tls_hostname
 
 bashio::log.info "Preparing Zafro Bridge..."
 
@@ -43,20 +43,13 @@ export ZAFRO_STATE_REFRESH="$(bashio::config 'state_refresh_seconds')"
 export ZAFRO_INFO_REFRESH="$(bashio::config 'info_refresh_seconds')"
 export ZAFRO_LOG_LEVEL="$(bashio::config 'log_level')"
 
-# allowed_serials is a list option; bashio::config prints one item per line
-# ("null" if the option is entirely unset). Collapse it into the
-# comma-separated form zafro_bridge.config expects, dropping blank/"null"
-# lines so an empty list really means "accept any appliance".
-allowed_serials=""
-while IFS= read -r serial_line; do
-    [[ -z "${serial_line}" || "${serial_line}" == "null" ]] && continue
-    if [[ -z "${allowed_serials}" ]]; then
-        allowed_serials="${serial_line}"
-    else
-        allowed_serials="${allowed_serials},${serial_line}"
-    fi
-done < <(bashio::config 'allowed_serials')
-export ZAFRO_ALLOWED_SERIALS="${allowed_serials}"
+# allowed_serials is a list option. Join it with jq straight from the options
+# file: bashio::config prints list items without a trailing newline, so a
+# `while read` loop over its output silently drops the last (often the only)
+# serial and leaves the listener open. Blank entries are dropped, so an empty
+# list really means "accept any appliance". tests/test_run_script.py runs this
+# exact filter.
+export ZAFRO_ALLOWED_SERIALS="$(jq --raw-output '[.allowed_serials // [] | .[] | select(type == "string" and length > 0)] | join(",")' /data/options.json)"
 
 export ZAFRO_LISTEN_HOST="0.0.0.0"
 export ZAFRO_LISTEN_PORT="8443"   # container port; the host mapping lives in config.yaml

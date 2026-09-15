@@ -80,14 +80,16 @@ Multiple keys may be combined in one `state` object.
 | cmd | Direction | Meaning |
 |---|---|---|
 | 1 | device → cloud | online / last-will status (`{"status":bool}`) |
-| 2 | cloud → device | request a full-state report (`{"cmd":2,"data":null}`) → device answers with cmd 3 |
-| 3 | device → cloud | **full-state snapshot** (every key at once) — use for initial state |
+| 2 | cloud → device | online-status query (`{"cmd":2,"data":null}`) → device answers with a cmd 1 status, not a snapshot |
+| 3 | both ways | **full-state snapshot**: cloud → device `{"cmd":3}` requests it; device → cloud replies with every key in `result` — use for initial state |
 | 4 | device → cloud | reply / state delta (echoes changed keys + `origin`) |
 | 5 | cloud → device (`{"cmd":5}`) / device → cloud | **device info**: `{"v":"I4SEASON","p":"<product>","ver":"<fw>","sn":"<SN>","ssid":"<wifi>","rssi":<int>,"mcu_ver":"<mcu fw>","mp":"<mcu part>"}` |
 | 6 | cloud → device | **set** one or more state keys |
 
-**Full-state read on startup:** publish `{"cmd":2,"sn":null,"user":"...","data":null}` to
+**Full-state read on startup:** publish `{"cmd":3,"user":"..."}` to
 `.../command/request`; the device replies with a `cmd:3` snapshot on `.../command/reply`.
+(This is the request the vendor cloud sends when the app opens. A `cmd:2` request
+only gets a `cmd:1` online status back.)
 Publish `{"cmd":5}` for device info (firmware, Wi-Fi RSSI, MCU part `HC32F030K8`).
 
 ## State keys (complete)
@@ -130,10 +132,11 @@ Device-info fields (from `cmd:5`), read-only: `v` (vendor "I4SEASON"), `p`
 - **Current temperature** arrives only via spontaneous `temperature` reports
   (origin 0); track it from `command/reply`.
 - **No full-state snapshot is pushed automatically on connect** — the device
-  waits to be asked. The bridge requests one explicitly: publishing
-  `{"cmd":2,"data":null}` to `.../command/request` reliably gets a `cmd:3`
-  full-state reply back (see the `cmd` table above and the "Full-state read
-  on startup" note). This is confirmed behavior, not speculative.
+  waits to be asked. The bridge requests one explicitly with `{"cmd":3}` on
+  `.../command/request`, the same request the vendor cloud sends, and the
+  device replies with a `cmd:3` snapshot. A `cmd:2` request is answered only
+  with a `cmd:1` online status; both behaviors are in the capture and were
+  confirmed on the tested unit.
 - **Temperature unit:** the bridge assumes the appliance always reports
   `templevel`/`temperature` in °F, since `tempunit:0` (°C) was never observed
   on the tested unit and its behavior there is unconfirmed (see the state-key

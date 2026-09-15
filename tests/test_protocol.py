@@ -101,7 +101,8 @@ def test_set_command_matches_captured_shape():
 
 
 def test_state_and_info_requests():
-    assert json.loads(protocol.build_state_request()) == {"cmd": 2, "user": protocol.BRIDGE_USER_TAG, "data": None}
+    # Same shape as the vendor cloud's snapshot request in the capture; a cmd 2 only returns an online status.
+    assert json.loads(protocol.build_state_request()) == {"cmd": 3, "user": protocol.BRIDGE_USER_TAG}
     assert json.loads(protocol.build_device_info_request()) == {"cmd": 5, "user": protocol.BRIDGE_USER_TAG}
 
 

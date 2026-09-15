@@ -76,7 +76,7 @@ enough to confirm the platform behaves the same way:
   `.../command/reply`. This gives the product code (`p`), firmware (`ver`),
   and MCU part (`mp`) for the new device.
 - **One `cmd:3` full-state snapshot.** Request it with
-  `{"cmd":2,"sn":null,"user":"...","data":null}` on `.../command/request` and
+  `{"cmd":3,"user":"..."}` on `.../command/request` and
   capture the `cmd:3` reply. This is the complete list of state keys the new
   product supports — compare it against the state-key table in
   `PROTOCOL.md` to see what's the same and what's different (different

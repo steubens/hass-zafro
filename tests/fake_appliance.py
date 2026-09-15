@@ -289,7 +289,7 @@ _CLI_DEVICE_INFO: dict[str, Any] = {
 
 
 async def _answer_like_the_real_unit(appliance: FakeAppliance, serial: str, state: dict[str, Any], payload: bytes) -> None:
-    """Reply to a bridge request the way the appliance does: cmd 2 -> cmd 3, cmd 5 -> cmd 5, cmd 6 -> cmd 4."""
+    """Reply to a bridge request the way the appliance does: cmd 3 -> cmd 3, cmd 5 -> cmd 5, cmd 6 -> cmd 4."""
     message = protocol.parse_device_message(payload) or {}
     command_code = message.get("cmd")
     if command_code == protocol.CMD_REQUEST_STATE:

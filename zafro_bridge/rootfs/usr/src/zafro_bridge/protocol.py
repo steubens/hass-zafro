@@ -53,8 +53,11 @@ DEVICE_CLIENT_ID_PREFIX: Final = "dev_"
 # Message-type codes carried in the "cmd" field
 # --------------------------------------------------------------------------- #
 CMD_ONLINE: Final = 1  # device -> cloud: online/last-will status
-CMD_REQUEST_STATE: Final = 2  # cloud -> device: please send a full snapshot
-CMD_STATE_SNAPSHOT: Final = 3  # device -> cloud: full state, every key
+CMD_REQUEST_ONLINE_STATUS: Final = 2  # cloud -> device: online query; the device answers with a cmd 1, not a snapshot
+CMD_STATE_SNAPSHOT: Final = 3  # both ways: {"cmd":3} asks for a full snapshot; the reply carries every key in "result"
+# What the bridge sends to ask for that snapshot. The capture shows the vendor
+# cloud requesting it as {"user":"app_<id>","cmd":3}; a cmd 2 only gets cmd 1 back.
+CMD_REQUEST_STATE: Final = CMD_STATE_SNAPSHOT
 CMD_REPLY: Final = 4  # device -> cloud: ack/delta with an "origin" marker
 CMD_DEVICE_INFO: Final = 5  # both ways: request / report firmware, wifi, mcu
 CMD_SET: Final = 6  # cloud -> device: set one or more state keys
@@ -167,8 +170,8 @@ def build_set_command(state_changes: dict[str, Any]) -> bytes:
 
 
 def build_state_request() -> bytes:
-    """Build a cmd-2 payload asking the device for a full-state snapshot."""
-    message = {"cmd": CMD_REQUEST_STATE, "user": BRIDGE_USER_TAG, "data": None}
+    """Build the cmd-3 request that makes the device reply with a full-state snapshot."""
+    message = {"cmd": CMD_REQUEST_STATE, "user": BRIDGE_USER_TAG}
     return json.dumps(message, separators=(",", ":")).encode()
 
 
